@@ -256,9 +256,21 @@ if __name__ == '__main__':
   import numpy as np
   import pretty_midi
   from tqdm import tqdm
+  import argparse
 
-  midi_fps = glob.glob('./lakh/lmd_full/*/*.mid*')
-  out_dir = './out'
+  parser = argparse.ArgumentParser(description='Lakh2NES adapter')
+  parser.add_argument('--data_path', type=str, default='.',
+                      help='Path to LMD dataset')
+  parser.add_argument('--output_path', type=str, default='.',
+                      help='Path where results should be stored')
+
+  args = parser.parse_args()
+
+  midi_folder = args.data_path
+  midi_fps = glob.glob(os.path.join(midi_folder, '*/*.mid*'))
+
+  output_folder = args.output_path
+  out_dir = os.path.join(output_folder, 'out')
 
   if os.path.isdir(out_dir):
     shutil.rmtree(out_dir)

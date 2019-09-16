@@ -152,6 +152,9 @@ parser.add_argument('--static-loss-scale', type=float, default=1,
 parser.add_argument('--dynamic-loss-scale', action='store_true',
                     help='Use dynamic loss scaling.  If supplied, this argument'
                     ' supersedes --static-loss-scale.')
+parser.add_argument('--src_script_path', type=str, default=os.getcwd(),
+                    help='Parent directory of the scripts that need to be saved')
+
 args = parser.parse_args()
 args.tied = not args.not_tied
 
@@ -163,8 +166,9 @@ assert args.batch_size % args.batch_chunk == 0
 
 args.work_dir = '{}-{}'.format(args.work_dir, args.dataset)
 args.work_dir = os.path.join(args.work_dir, time.strftime('%Y%m%d-%H%M%S'))
+src_script_path = args.src_script_path
 logging = create_exp_dir(args.work_dir,
-    scripts_to_save=['train.py', 'mem_transformer.py'], debug=args.debug)
+    scripts_to_save=[os.path.join(src_script_path, 'train.py'), os.path.join(src_script_path, 'mem_transformer.py')], debug=args.debug)
 
 # Set the random seed manually for reproducibility.
 np.random.seed(args.seed)

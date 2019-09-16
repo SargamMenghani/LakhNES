@@ -1,8 +1,7 @@
-for WORKDIR in ./pretrained/NES ./pretrained/NESAug ./pretrained/Lakh100k ./pretrained/Lakh200k ./pretrained/LakhNES
+for WORKDIR in ./pretrained/LakhNES
 do
 	python eval.py \
-		--cuda \
-		--data ../data/nesmdb_tx1 \
+		--data /home/nisarg/inhouse_research/imusic/third_party_repos/repo_data/nesmdb_tx1 \
 		--dataset nesmdb \
 		--split all \
 		--batch_size 10 \

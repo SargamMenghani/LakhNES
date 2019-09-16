@@ -43,10 +43,12 @@ if __name__ == '__main__':
     os.makedirs(args.out_dir)
   ext = '.tx1.txt' if args.tx1 else '.tx2.txt'
   device = torch.device('cuda' if args.gpu else 'cpu')
+  storage = 'cuda' if args.gpu else 'cpu'
 
   # Load the best saved model.
   with open(model_fp, 'rb') as f:
-    model = torch.load(f)
+    # model = torch.load(f)
+    model = torch.load(f, map_location=lambda storage, location: storage)
   model.backward_compatible()
   model = model.to(device)
 

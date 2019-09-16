@@ -6,10 +6,10 @@ def midi_to_tx1(midi):
   pretty_midi.pretty_midi.MAX_TICK = 1e16
 
   # Load MIDI file
-  with tempfile.NamedTemporaryFile('wb') as mf:
-    mf.write(midi)
-    mf.seek(0)
-    midi = pretty_midi.PrettyMIDI(mf.name)
+  # with tempfile.NamedTemporaryFile('wb') as mf:
+  #   mf.write(midi)
+  #   mf.seek(0)
+  #   midi = pretty_midi.PrettyMIDI(mf.name)
 
   ins_names = ['p1', 'p2', 'tr', 'no']
   instruments = sorted(midi.instruments, key=lambda x: ins_names.index(x.name))

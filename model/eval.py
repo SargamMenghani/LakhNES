@@ -1,4 +1,8 @@
 # coding: utf-8
+
+import warnings
+warnings.filterwarnings("ignore")
+
 import argparse
 import time
 import math
@@ -41,6 +45,7 @@ args = parser.parse_args()
 assert args.ext_len >= 0, 'extended context length must be non-negative'
 
 device = torch.device("cuda" if args.cuda else "cpu")
+storage = "cuda" if args.cuda else "cpu"
 
 # Get logger
 logging = get_logger(os.path.join(args.work_dir, 'log.txt'),
@@ -57,7 +62,8 @@ te_iter = corpus.get_iterator('test', args.batch_size, args.tgt_len,
 
 # Load the best saved model.
 with open(os.path.join(args.work_dir, 'model.pt'), 'rb') as f:
-    model = torch.load(f)
+    # model = torch.load(f)
+    model = torch.load(f, map_location=lambda storage, location: storage)
 model.backward_compatible()
 model = model.to(device)
 
@@ -83,6 +89,8 @@ def evaluate(eval_iter):
         for idx, (data, target, seq_len) in enumerate(eval_iter):
             ret = model(data, target, *mems)
             loss, mems = ret[0], ret[1:]
+            #print(loss.mean())
+            #print(25*'-')
             loss = loss.mean()
             total_loss += seq_len * loss.item()
             total_len += seq_len
