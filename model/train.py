@@ -192,6 +192,7 @@ if args.fp16:
             args.fp16 = False
 
 device = torch.device('cuda' if args.cuda else 'cpu')
+storage = 'cuda' if args.gpu else 'cpu'
 
 ###############################################################################
 # Load data
@@ -282,7 +283,7 @@ def update_dropatt(m):
 
 if args.restart:
     with open(os.path.join(args.restart_dir, 'model.pt'), 'rb') as f:
-        model = torch.load(f)
+        model = torch.load(f, map_location=lambda storage, location: storage)
     if not args.fp16:
         model = model.float()
     model.apply(update_dropout)
