@@ -1,4 +1,8 @@
 # coding: utf-8
+
+import warnings
+warnings.filterwarnings("ignore")
+
 import argparse
 import time
 import math
@@ -24,17 +28,17 @@ parser.add_argument('--dataset', type=str, default='wt103',
                     help='dataset name')
 parser.add_argument('--n_layer', type=int, default=12,
                     help='number of total layers')
-parser.add_argument('--n_head', type=int, default=10,
+parser.add_argument('--n_head', type=int, default=8,
                     help='number of heads')
-parser.add_argument('--d_head', type=int, default=50,
+parser.add_argument('--d_head', type=int, default=64,
                     help='head dimension')
-parser.add_argument('--d_embed', type=int, default=-1,
+parser.add_argument('--d_embed', type=int, default=512,
                     help='embedding dimension')
-parser.add_argument('--d_model', type=int, default=500,
+parser.add_argument('--d_model', type=int, default=512,
                     help='model dimension')
-parser.add_argument('--d_inner', type=int, default=1000,
+parser.add_argument('--d_inner', type=int, default=2048,
                     help='inner dimension in FF')
-parser.add_argument('--dropout', type=float, default=0.0,
+parser.add_argument('--dropout', type=float, default=0.1,
                     help='global dropout rate')
 parser.add_argument('--dropatt', type=float, default=0.0,
                     help='attention probability dropout rate')
@@ -53,7 +57,7 @@ parser.add_argument('--proj_init_std', type=float, default=0.01,
 parser.add_argument('--optim', default='adam', type=str,
                     choices=['adam', 'sgd', 'adagrad'],
                     help='optimizer to use.')
-parser.add_argument('--lr', type=float, default=0.00025,
+parser.add_argument('--lr', type=float, default=2e-5,
                     help='initial learning rate (0.00025|5 for adam|sgd)')
 parser.add_argument('--mom', type=float, default=0.0,
                     help='momentum for sgd')
@@ -72,7 +76,7 @@ parser.add_argument('--clip_nonemb', action='store_true',
                     help='only clip the gradient of non-embedding params')
 parser.add_argument('--max_step', type=int, default=100000,
                     help='upper epoch limit')
-parser.add_argument('--batch_size', type=int, default=60,
+parser.add_argument('--batch_size', type=int, default=30,
                     help='batch size')
 parser.add_argument('--batch_chunk', type=int, default=1,
                     help='split batch into chunks to save memory')
@@ -87,13 +91,13 @@ parser.add_argument('--augment_selectens', action='store_true',
 parser.add_argument('--skip_short', action='store_true',
                     help='skip short sequences (len < 10)')
 parser.add_argument('--trim_padding', action='store_true', help='trim beginning and end waits')
-parser.add_argument('--tgt_len', type=int, default=70,
+parser.add_argument('--tgt_len', type=int, default=512,
                     help='number of tokens to predict')
-parser.add_argument('--eval_tgt_len', type=int, default=50,
+parser.add_argument('--eval_tgt_len', type=int, default=128,
                     help='number of tokens to predict for evaluation')
 parser.add_argument('--ext_len', type=int, default=0,
                     help='length of the extended context')
-parser.add_argument('--mem_len', type=int, default=0,
+parser.add_argument('--mem_len', type=int, default=512,
                     help='length of the retained previous heads')
 parser.add_argument('--not_tied', action='store_true',
                     help='do not tie the word embedding and softmax weights')
@@ -192,7 +196,7 @@ if args.fp16:
             args.fp16 = False
 
 device = torch.device('cuda' if args.cuda else 'cpu')
-storage = 'cuda' if args.gpu else 'cpu'
+storage = 'cuda' if args.cuda else 'cpu'
 
 ###############################################################################
 # Load data
