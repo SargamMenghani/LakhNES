@@ -117,6 +117,8 @@ parser.add_argument('--multi_gpu', action='store_true',
                     help='use multiple GPU')
 parser.add_argument('--log-interval', type=int, default=200,
                     help='report interval')
+parser.add_argument('--model_save_interval', type=int, default=200,
+                    help='interval to save models')
 parser.add_argument('--eval-interval', type=int, default=4000,
                     help='evaluation interval')
 parser.add_argument('--work_dir', default='LM-TFM', type=str,
@@ -512,6 +514,7 @@ def train():
             train_loss = 0
             log_start_time = time.time()
 
+        val_save_flag = False
         if train_step == 1 or train_step % args.eval_interval == 0:
             val_loss = evaluate(va_iter)
             logging('-' * 100)
@@ -528,10 +531,13 @@ def train():
             # Save the model if the validation loss is the best we've seen so far.
             if not best_val_loss or val_loss < best_val_loss:
                 if not args.debug:
-                    with open(os.path.join(args.work_dir, 'model.pt'), 'wb') as f:
+                    model_save_name = 'model_{0}_{1:.2f}.pt'.format(train_step, round(val_loss, 2))
+                    optimizer_save_name = 'optimizer_{0}_{1:.2f}.pt'.format(train_step, round(val_loss, 2))
+                    with open(os.path.join(args.work_dir, model_save_name), 'wb') as f:
                         torch.save(model, f)
-                    with open(os.path.join(args.work_dir, 'optimizer.pt'), 'wb') as f:
+                    with open(os.path.join(args.work_dir, optimizer_save_name), 'wb') as f:
                         torch.save(optimizer.state_dict(), f)
+                    val_save_flag = True
                 best_val_loss = val_loss
 
             # dev-performance based learning rate annealing
@@ -541,6 +547,15 @@ def train():
                     scheduler_sparse.step(val_loss)
 
             eval_start_time = time.time()
+
+        # Saving the model at regular intervals irrespective of validation loss
+        if (train_step % args.model_save_interval == 0) and (not val_save_flag) and (not args.debug):
+            model_save_name = 'model_{0}.pt'.format(train_step)
+            optimizer_save_name = 'optimizer_{0}.pt'.format(train_step)
+            with open(os.path.join(args.work_dir, model_save_name), 'wb') as f:
+                torch.save(model, f)
+            with open(os.path.join(args.work_dir, optimizer_save_name), 'wb') as f:
+                torch.save(optimizer.state_dict(), f)
 
         if train_step == args.max_step:
             break

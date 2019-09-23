@@ -129,6 +129,6 @@ def tx1_to_midi(tx1):
 
   with tempfile.NamedTemporaryFile('rb') as mf:
     midi.write(mf.name)
-    midi = mf.read()
+    midi_str = mf.read()
 
-  return midi
+  return midi, midi_str
